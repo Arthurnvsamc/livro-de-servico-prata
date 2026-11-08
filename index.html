@@ -1,0 +1,1055 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Editor local do Livro de Serviço do Aluno de Dia ao Esquadrão Prata. Gere TXT e copie para o Zimbra.">
+<meta name="referrer" content="no-referrer">
+<title>Livro de Serviço · Esquadrão Prata</title>
+<style>
+  :root { color-scheme: light; --ink:#18283b; --muted:#4f6275; --paper:#fff; --bg:#eef3f7; --line:#cfd9e3; --accent:#245784; --accent-dark:#173d60; --nav:#11283e; --soft:#eaf2fa; --ok:#196047; --warn:#83521a; font:16px/1.5 system-ui,sans-serif; }
+  *, *::before, *::after { box-sizing:border-box; }
+  [hidden] { display:none!important; }
+  body { margin:0; color:var(--ink); background:var(--bg); }
+  h1,h2,h3,p { margin:0; }
+  h1 { font-size:clamp(1.65rem,4vw,2.5rem); letter-spacing:-.04em; line-height:1.12; }
+  h2 { font-size:1.28rem; line-height:1.24; letter-spacing:-.02em; }
+  h3 { font-size:1rem; }
+  .frame { width:min(1500px,calc(100% - 48px)); margin-inline:auto; }
+  .mast { color:white; background:linear-gradient(112deg,#10253a,#1c4162); padding:24px 0 21px; border-bottom:4px solid #85a9c5; }
+  .mast-inner,.brand,.mast-actions,.modebar,.mode-switch,.group-actions,.exports,.dialog-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .mast-inner { justify-content:space-between; gap:17px; }
+  .brand { flex-wrap:nowrap; gap:13px; }
+  .mark { width:46px; height:46px; flex:0 0 46px; display:grid; place-items:center; border-radius:10px; border:1px solid #88abc9; background:#ffffff12; }
+  .eyebrow { font-size:.69rem; letter-spacing:.14em; text-transform:uppercase; font-weight:800; color:#c2d7e8; margin-bottom:4px; }
+  .btn { cursor:pointer; min-height:40px; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:7px 11px; border:1px solid #a9bbcd; border-radius:7px; background:#fff; color:var(--accent-dark); font:700 .87rem/1.25 system-ui,sans-serif; text-decoration:none; }
+  .btn:hover { background:#e8f1fa; }
+  .btn:disabled { opacity:.54; cursor:default; }
+  .btn-primary { color:#fff; background:var(--accent); border-color:var(--accent); }
+  .btn-primary:hover { background:var(--accent-dark); }
+  .btn-ghost { background:#ffffff12; color:#f6fbff; border-color:#ffffff61; }
+  .btn-ghost:hover { background:#ffffff25; }
+  .btn-small { min-height:32px; padding:5px 8px; font-size:.78rem; }
+  .btn[aria-pressed=true] { background:var(--soft); border-color:var(--accent); color:var(--accent-dark); }
+  .modebar { justify-content:space-between; margin:17px 0; gap:9px 15px; }
+  .hint { font-size:.84rem; color:var(--muted); }
+  .modebar .hint { max-width:58ch; }
+  .workspace { display:grid; grid-template-columns:200px minmax(0,1.16fr) minmax(0,1fr); gap:15px; align-items:start; padding-bottom:30px; }
+  .card { min-width:0; background:var(--paper); border:1px solid var(--line); border-radius:11px; }
+  .nav { padding:12px; position:sticky; top:12px; }
+  .nav h2 { padding:3px 5px 9px; font-size:.8rem; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; }
+  .nav-list { display:grid; gap:4px; }
+  .nav-btn { display:flex; align-items:center; gap:8px; border:1px solid transparent; border-radius:7px; width:100%; background:transparent; color:var(--ink); padding:8px 6px; text-align:left; cursor:pointer; font:650 .83rem/1.25 system-ui,sans-serif; min-height:42px; }
+  .nav-btn:hover { background:#f3f7fc; }
+  .nav-btn[aria-current=true] { background:var(--soft); border-color:#c2d5e8; color:var(--accent-dark); }
+  .nav-number { flex:0 0 auto; font-size:.71rem; color:#4b6580; background:#eaf0f6; border-radius:5px; padding:3px 5px; font-variant-numeric:tabular-nums; }
+  .nav-name { flex:1 1 auto; }
+  .count { color:var(--muted); font-size:.72rem; }
+  .count.complete { color:var(--ok); }
+  .editor,.result { padding:16px; }
+  .editor { scroll-margin-top:12px; }
+  .result { position:sticky; top:12px; scroll-margin-top:12px; }
+  .free-mode { grid-column:1 / 3; }
+  .help-top { margin-top:5px; margin-bottom:13px; }
+  .field { min-width:0; margin-top:11px; }
+  .field label { display:block; margin-bottom:4px; font-size:.88rem; font-weight:730; }
+  .field .hint { margin-top:4px; }
+  .field input,.field select,.field textarea,.preview { width:100%; display:block; min-width:0; min-height:43px; color:var(--ink); background:#fbfdff; padding:8px 10px; border:1px solid #aebed0; border-radius:7px; font:inherit; }
+  .field textarea { resize:vertical; }
+  .field .group-actions { margin-top:5px; }
+  .pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 12px; }
+  .section-rule { border:0; border-top:1px solid var(--line); margin:17px 0; }
+  .section-tools { margin:8px 0 3px; }
+  .section-foot { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; margin-top:17px; padding-top:13px; border-top:1px solid var(--line); }
+  .result-head { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+  .pill { display:inline-flex; align-items:center; gap:5px; padding:3px 7px; border-radius:6px; background:#fbf1df; color:var(--warn); font-size:.76rem; font-weight:740; }
+  .pill.ready { background:#e3f3eb; color:var(--ok); }
+  .result-tabs { display:flex; gap:6px; flex-wrap:wrap; margin-top:11px; }
+  .preview { height:min(51vh,600px); min-height:200px; resize:vertical; margin:10px 0; font: .79rem/1.57 ui-monospace,Consolas,monospace; background:#f7faff; }
+  .exports { gap:6px; }
+  .result .hint { margin-top:8px; }
+  .result details { margin-top:12px; border-top:1px solid var(--line); padding-top:9px; }
+  summary { cursor:pointer; font-weight:700; font-size:.86rem; }
+  .code { height:110px; min-height:80px; }
+  .official-list { max-height:min(53vh,650px); overflow:auto; padding:0 4px 2px 0; margin:9px 0; }
+  .copy-row { display:flex; gap:5px; align-items:center; justify-content:space-between; margin-bottom:4px; }
+  .copy-row label { margin:0; }
+  .official-list textarea { font-size:.83rem; }
+  .result .preview-copy { position:fixed; top:0; left:-200vw; width:700px; white-space:normal; }
+  .note { margin-bottom:10px; }
+  .float-status { position:fixed; right:16px; bottom:14px; z-index:4; padding:9px 12px; border-radius:8px; box-shadow:0 2px 13px #172f3c39; background:#163f36; color:white; font-size:.86rem; max-width:min(430px,calc(100% - 32px)); }
+  .float-status[data-error=true] { background:#743126; }
+  .float-status:empty { display:none; }
+  #free-text { min-height:420px; font: .87rem/1.57 ui-monospace,Consolas,monospace; }
+  dialog { width:min(465px,calc(100% - 22px)); max-height:calc(100% - 25px); padding:16px; color:var(--ink); border:1px solid var(--line); border-radius:11px; }
+  dialog::backdrop { background:#0b2336ac; }
+  .dialog-actions { margin-top:13px; }
+  .reference-note { margin-top:5px; color:var(--accent-dark); font-size:.81rem; }
+  .reference-box { margin-top:9px; padding:8px 10px; border-radius:7px; background:var(--soft); }
+  .reference-box .btn { margin-top:6px; }
+  .dialog-error { margin-top:8px; color:#863329; font-size:.88rem; }
+  .dialog-error:empty { display:none; }
+  :focus-visible { outline:3px solid #3682b7; outline-offset:2px; }
+  @media (max-width:1130px) {
+    .workspace { grid-template-columns:minmax(0,1.16fr) minmax(0,1fr); }
+    .nav { grid-column:1 / -1; position:static; padding:7px; }
+    .nav h2 { display:none; }
+    .nav-list { display:flex; flex-wrap:wrap; }
+    .nav-btn { width:auto; padding-inline:8px; }
+    .free-mode { grid-column:auto; }
+  }
+  @media (max-width:740px) {
+    .frame { width:calc(100% - 22px); }
+    .mast { padding:15px 0; }
+    .mast-actions { width:100%; }
+    .workspace { grid-template-columns:minmax(0,1fr); gap:10px; }
+    .modebar { margin:12px 0; }
+    .nav-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .nav-btn { width:100%; padding-inline:5px; }
+    .result { position:static; }
+    #free-text { min-height:280px; }
+  }
+  @media (max-width:370px) { .pair { grid-template-columns:minmax(0,1fr); } }
+</style>
+</head>
+<body>
+<header class="mast">
+  <div class="frame mast-inner">
+    <div class="brand">
+      <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5a2 2 0 0 1 2-2h13v17H6a2 2 0 0 1-2-2zM4 17.5h15M8 8h7M8 11h7"/></svg></div>
+      <div><div class="eyebrow">Esquadrão Prata · Aluno de Dia</div><h1>Livro de Serviço</h1></div>
+    </div>
+    <div class="mast-actions">
+      <button class="btn btn-ghost" type="button" id="open-txt">Abrir TXT</button>
+      <button class="btn btn-ghost" type="button" id="schedule-open">Horários de referência</button>
+      <button class="btn btn-ghost" type="button" id="save">Salvar rascunho</button>
+      <button class="btn btn-ghost" type="button" id="reset">Novo serviço</button>
+      <input type="file" id="txt-file" accept=".txt,text/plain" hidden>
+    </div>
+  </div>
+</header>
+
+<main class="frame">
+  <div class="modebar">
+    <div class="mode-switch" aria-label="Modo de edição">
+      <button class="btn" id="guided-mode" type="button" aria-pressed="true">Por campos</button>
+      <button class="btn" id="free-mode" type="button" aria-pressed="false">Texto livre</button>
+      <a class="btn" href="#resultado">Ir para o resultado</a>
+    </div>
+    <p class="hint">O preenchimento fica no navegador. Use “Salvar rascunho” para continuar neste dispositivo.</p>
+  </div>
+
+  <div class="workspace">
+    <nav class="card nav" id="nav" aria-label="Seções do livro">
+      <h2>Preenchimento</h2><div class="nav-list" id="nav-list"></div>
+    </nav>
+
+    <section class="card editor" id="editor" aria-label="Preenchimento por campos">
+      <div id="panels"></div>
+      <div class="section-foot">
+        <button class="btn" id="back" type="button">Anterior</button>
+        <button class="btn btn-primary" id="next" type="button">Próxima seção</button>
+      </div>
+    </section>
+
+    <section class="card editor free-mode" id="free-editor" hidden aria-labelledby="free-title">
+      <h2 id="free-title">Editar texto livre</h2>
+      <p class="hint help-top">Cole ou abra o livro completo para editar e exportar mantendo as quebras de linha. O formulário por campos tem um rascunho separado.</p>
+      <button class="btn btn-small" id="use-guided" type="button">Trazer texto do formulário</button>
+      <div class="field">
+        <label for="free-text">Texto do livro</label>
+        <textarea id="free-text" rows="17" spellcheck="false" placeholder="Cole aqui a versão do livro que você quer usar."></textarea>
+      </div>
+    </section>
+
+    <aside class="card result" id="resultado" aria-labelledby="result-title">
+      <div class="result-head"><h2 id="result-title">Resultado</h2><span class="pill" id="review"></span></div>
+      <div class="result-tabs" aria-label="Visualização do resultado">
+        <button class="btn btn-small" id="book-view" type="button" aria-pressed="true">Livro completo</button>
+        <button class="btn btn-small" id="official-view" type="button" aria-pressed="false">Campos oficiais</button>
+        <button class="btn btn-small" id="next-pending" type="button">Ir à pendência</button>
+      </div>
+      <div id="book-output">
+        <textarea id="preview" class="preview" readonly spellcheck="false" aria-label="Prévia do livro em texto simples" placeholder="O texto do livro aparece aqui."></textarea>
+        <div class="exports">
+          <button class="btn btn-primary" id="copy-zimbra" type="button">Copiar para Zimbra</button>
+          <button class="btn" id="copy-text" type="button">Copiar TXT</button>
+          <button class="btn" id="download" type="button">Baixar TXT</button>
+        </div>
+        <p class="hint">No Zimbra, use o modo HTML e cole normalmente. O TXT mantém o texto simples.</p>
+        <details>
+          <summary>Código HTML com &lt;br&gt;</summary>
+          <textarea id="html-code" class="preview code" readonly spellcheck="false" aria-label="Código HTML do livro"></textarea>
+          <button class="btn btn-small" id="copy-code" type="button">Copiar código HTML</button>
+          <p class="hint">Use o código em um campo próprio para código-fonte HTML.</p>
+        </details>
+      </div>
+      <div id="official-output" hidden>
+        <p class="hint">Selecione PRATA no sistema oficial e cole cada bloco no campo correspondente. O sistema oficial gera o PDF.</p>
+        <div class="official-list" id="official-list"></div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<p class="float-status" id="status" role="status"></p>
+<dialog id="record-dialog" aria-labelledby="dialog-title">
+  <form id="record-form">
+    <h2 id="dialog-title"></h2>
+    <div id="record-fields"></div>
+    <p class="dialog-error" id="record-error" role="alert"></p>
+    <div class="dialog-actions">
+      <button class="btn btn-primary" id="record-submit" type="submit">Inserir registro</button>
+      <button class="btn" id="record-cancel" type="button">Cancelar</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="schedule-dialog" aria-labelledby="schedule-title">
+  <form id="schedule-form">
+    <h2 id="schedule-title">Horários de referência</h2>
+    <p class="hint help-top">Cadastre os horários da NPA que você usa. Escolha o tipo de dia no formulário para consultar a referência.</p>
+    <div class="field">
+      <label for="schedule-day">Tipo de dia</label>
+      <select id="schedule-day"></select>
+    </div>
+    <div class="pair" id="schedule-times"></div>
+    <div class="dialog-actions">
+      <button class="btn btn-primary" type="submit">Salvar horários</button>
+      <button class="btn" id="schedule-cancel" type="button">Fechar</button>
+    </div>
+  </form>
+</dialog>
+<script>
+'use strict';
+
+const get = id => document.getElementById(id);
+const pendingMark = '[PENDENTE]';
+const none = 'Não houve.';
+const noChange = 'Não houve alteração.';
+const storageKey = 'livro-prata:v1:' + location.pathname;
+const scheduleKey = storageKey + ':horarios';
+const dayTypes = [
+  ['useful','Dia útil'], ['nonWorking','Dia não útil'], ['half','Meio expediente']
+];
+const activityLabels = [
+  ['breakfast','Café da manhã'], ['lunch','Almoço'], ['dinner','Jantar'], ['overnight','Pernoite']
+];
+const scheduleNotes = [];
+let schedule = loadSchedule();
+const months = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+const lodgings = ['ALFA','BRAVO','CHARLIE','DELTA'];
+const events = [
+  ['ALMOÇO', 'O almoço'], ['SEGUNDA JORNADA', 'A segunda jornada'],
+  ['JANTAR', 'O jantar'], ['CEIA', 'A ceia'],
+  ['CAFÉ DA MANHÃ', 'O café da manhã'], ['PRIMEIRA JORNADA', 'A primeira jornada']
+];
+const medical = ['JUNTA MÉDICA','HOSPITAL','ORTOPEDISTA','ODONTOLOGIA','GINECOLOGISTA','PSICOLOGIA',
+  'FONOAUDIOLOGIA','NUTRICIONISTA','OFTALMOLOGISTA','FISIOTERAPIA','FARMÁCIA','DERMATOLOGISTA','POSTO MÉDICO','DISPENSAS MÉDICAS'];
+const periods = ['22 h 00 min às 00 h 00 min','00 h 00 min às 02 h 00 min','02 h 00 min às 04 h 00 min','04 h 00 min às 06 h 00 min'];
+const roster = [
+  ['officer','Oficial de Permanência'],
+  ['sergeant','SGT de Dia ao CA'],
+  ['ca','Aluno de Dia ao Corpo de Alunos'],
+  ['current','Aluno de Dia ao Esquadrão'],
+  ...[1,2,3,4].map(n => ['flight' + n, 'Aluno de Dia ' + n + 'ª esquadrilha'])
+];
+const officialLabels = [
+  ['start','Serviço do dia'], ['end','Para o dia'], ['receiving','Recebimento do SV'],
+  ['material','Material carga'], ['facilities','Instalações'], ['overnight','Pernoite'],
+  ['occurrences','Ocorrências'], ['suggestions','Sugestões'], ['handover','Passagem do SV'], ['signature','Aluno de SV']
+];
+
+function freshDraft() {
+  return {version: 1, mode: 'guided', section: 0, fields: {}, text: ''};
+}
+
+let draft = freshDraft();
+let view = 'book';
+let noticeTimer;
+let currentOutput;
+let activeDialog;
+const fields = new Map();
+const steps = [];
+const officialControls = new Map();
+
+function node(tag, properties = {}) {
+  return Object.assign(document.createElement(tag), properties);
+}
+
+function button(label, handler, classes = 'btn btn-small') {
+  const control = node('button', {type: 'button', textContent: label, className: classes});
+  control.addEventListener('click', handler);
+  return control;
+}
+
+function status(message, error = false) {
+  clearTimeout(noticeTimer);
+  get('status').textContent = message;
+  get('status').dataset.error = error;
+  noticeTimer = setTimeout(() => {get('status').textContent = '';}, error ? 9500 : 4300);
+}
+
+function step(label, title, hint) {
+  const index = steps.length;
+  const panel = node('div', {hidden: index !== 0});
+  const heading = node('h2', {textContent: title, tabIndex: -1});
+  panel.append(heading, node('p', {className:'hint help-top',textContent:hint}));
+  get('panels').append(panel);
+  const navButton = button('', () => showStep(index, true), 'nav-btn');
+  const badge = node('span', {className:'count'});
+  navButton.append(node('span', {className:'nav-number',textContent:String(index + 1).padStart(2,'0')}),
+    node('span', {className:'nav-name',textContent:label}), badge);
+  get('nav-list').append(navButton);
+  const group = {panel, heading, navButton, badge, keys: []};
+  steps.push(group);
+  return group;
+}
+
+function subhead(group, title) {
+  group.panel.append(node('hr', {className:'section-rule'}), node('h3', {textContent:title}));
+}
+
+function pair(group) {
+  const container = node('div', {className:'pair'});
+  group.panel.append(container);
+  return container;
+}
+
+function value(key) {
+  return (draft.fields[key] || '').trim();
+}
+
+function setField(key, text) {
+  draft.fields[key] = text;
+  fields.get(key).control.value = text;
+  refresh();
+}
+
+function setWithConfirm(key, text) {
+  if (value(key) && value(key) !== text && !window.confirm('Substituir o conteúdo deste campo?')) return;
+  setField(key, text);
+}
+
+function field(group, key, label, options = {}) {
+  const {parent = group.panel, type = 'text', rows = 2, placeholder = '', note,
+    empty, emptyLabel, builder, choices, optional = false} = options;
+  const id = 'field-' + key;
+  const control = choices ? selectFrom(choices) : type === 'area' ? node('textarea', {rows}) : node('input', {type});
+  Object.assign(control, {id, placeholder, spellcheck:false, autocomplete:'off'});
+  const holder = node('div', {className:'field'});
+  holder.append(node('label', {htmlFor:id,textContent:label}),control);
+  if (note) {
+    holder.append(node('p', {id:id+'-note',className:'hint',textContent:note}));
+    control.setAttribute('aria-describedby',id+'-note');
+  }
+  if (builder?.reference) {
+    const note = node('p',{id:id+'-reference',className:'reference-note'});
+    holder.append(note);
+    control.setAttribute('aria-describedby',[control.getAttribute('aria-describedby'),note.id].filter(Boolean).join(' '));
+    scheduleNotes.push({note,reference:builder.reference});
+  }
+  const tools = node('div', {className:'group-actions'});
+  if (empty) tools.append(button(emptyLabel || empty, () => setWithConfirm(key, empty)));
+  if (builder) tools.append(button(builder.label, () => openBuilder(key, label, builder)));
+  if (tools.childElementCount) holder.append(tools);
+  parent.append(holder);
+  fields.set(key, {control, group, label, optional});
+  group.keys.push(key);
+  control.addEventListener(choices ? 'change' : 'input', () => {
+    draft.fields[key] = control.value;
+    refresh();
+  });
+  return control;
+}
+
+function groupAction(group, label, handler) {
+  const holder = node('div', {className:'section-tools'});
+  holder.append(button(label,handler));
+  group.panel.append(holder);
+}
+
+function selectFrom(choices) {
+  const control = node('select');
+  for (const [value,label] of choices) control.append(node('option',{value,textContent:label}));
+  return control;
+}
+
+function loadSchedule() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(scheduleKey));
+    return stored && typeof stored === 'object' ? stored : {};
+  } catch { return {}; }
+}
+
+function configuredTime(type,activity) {
+  if (!dayTypes.some(([id]) => id === type)) return '';
+  const time = schedule[type]?.[activity];
+  return typeof time === 'string' && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time) ? time : '';
+}
+
+function referenceInfo({day,activity}) {
+  const type = value(day);
+  const label = dayTypes.find(([id]) => id === type)?.[1];
+  const time = configuredTime(type,activity);
+  if (!label) return {time, message:'Selecione o tipo de dia na Identificação para ver a referência.'};
+  if (!time) return {time, message:'Cadastre o horário de ' + label.toLowerCase() + ' em “Horários de referência”.'};
+  return {time, message:'Referência · ' + label + ' · ' + time + '. Confira o horário ocorrido.'};
+}
+
+function dateText(text) {
+  const match = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return match && months[Number(match[2]) - 1] ? match[3] + ' ' + months[Number(match[2]) - 1] + ' ' + match[1] : '';
+}
+
+function clock(text, padHour = true) {
+  const match = text.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match || Number(match[1]) > 23 || Number(match[2]) > 59) return text;
+  return (padHour ? match[1].padStart(2,'0') : String(Number(match[1]))) + ' h ' + match[2] + ' min';
+}
+
+const item = (label, type = 'text', required = false, placeholder = '') => ({label,type,required,placeholder});
+const ident = item('Identificação do aluno', 'text', true, 'AL matrícula especialidade nome');
+const row = (label, text) => label + ':' + (text ? ' ' + text : '');
+const lines = values => values.join('\n');
+
+function addEntry(old, entry) {
+  return !old || old === none || /^\[pendente\]$/i.test(old) ? entry : old + '\n\n' + entry;
+}
+
+const visit = {
+  label:'Adicionar atendimento',
+  fields:[ident,item('IDA','text',false,'HH:MM ou horário do relato'),item('VOLTA','text',false,'HH:MM ou horário do relato'),item('MOTIVO')],
+  format:([student,out,back,reason]) => lines([student,row('IDA',clock(out)),row('VOLTA',clock(back)),row('MOTIVO',reason)])
+};
+const waiver = {
+  label:'Adicionar dispensa',
+  fields:[ident,item('NÚMERO'),item('INÍCIO','text',false,'DD MMM AAAA'),item('TÉRMINO','text',false,'DD MMM AAAA'),item('MOTIVO'),item('DISPENSADO DE')],
+  format:([student,...data]) => lines([student,...data.map((text,i) => row(['NÚMERO','INÍCIO','TÉRMINO','MOTIVO','DISPENSADO DE'][i],text))])
+};
+const swap = {
+  label:'Adicionar permuta',
+  fields:['ENTRA','SAI','POSTO','MOTIVO'].map(label => item(label,'text',true)),
+  format:data => lines(data.map((text,i) => row(['ENTRA','SAI','POSTO','MOTIVO'][i],text)))
+};
+const departure = {
+  label:'Adicionar guia',
+  fields:[ident,item('DATA DE SAÍDA','text',false,'DD MMM AAAA'),item('HORÁRIO DE SAÍDA','text',false,'HH:MM'),
+    item('DATA DE RETORNO','text',false,'DD MMM AAAA'),item('HORÁRIO DE RETORNO','text',false,'HH:MM ou previsão'),item('MOTIVO')],
+  format:([student,outDay,outTime,backDay,backTime,reason]) => lines([
+    student,row('DATA DE SAÍDA',outDay),row('HORÁRIO DE SAÍDA',clock(outTime)),
+    row('DATA DE RETORNO',backDay),row('HORÁRIO DE RETORNO',clock(backTime)),row('MOTIVO',reason)
+  ])
+};
+
+function nextOccurrence(text) {
+  const numbers = [...text.matchAll(/^5\.(\d+)\)/gm)].map(match => Number(match[1]));
+  return '5.' + (Math.max(0,...numbers) + 1) + ') ';
+}
+
+const general = {
+  label:'Adicionar ocorrência',
+  fields:[item('Relato da ocorrência','area',true)],
+  apply:(old, [text]) => addEntry(old,nextOccurrence(old) + text)
+};
+function countWords(n) {
+  const units = ['zero','uma','duas','três','quatro','cinco','seis','sete','oito','nove'];
+  const teens = ['dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
+  const tens = ['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
+  const hundreds = ['','cento','duzentas','trezentas','quatrocentas','quinhentas','seiscentas','setecentas','oitocentas','novecentas'];
+  if (n < 10) return units[n];
+  if (n < 20) return teens[n - 10];
+  if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? ' e ' + units[n % 10] : '');
+  if (n === 100) return 'cem';
+  if (n < 1000) return hundreds[Math.floor(n / 100)] + (n % 100 ? ' e ' + countWords(n % 100) : '');
+  const thousands = Math.floor(n / 1000);
+  const rest = n % 1000;
+  const prefix = thousands === 1 ? 'mil' : units[thousands] + ' mil';
+  return prefix + (rest ? (rest < 100 || rest % 100 === 0 ? ' e ' : ' ') + countWords(rest) : '');
+}
+
+function absenceList(text) {
+  return text.split('\n').map(line => line.trim().replace(/^\d+\s*[-.)]\s+/, '')).filter(Boolean);
+}
+
+const overnightReport = {
+  label:'Adicionar relato',
+  fields:[
+    item('Horário do pernoite','time',true),
+    {...item('Local','text',true),initial:'Pátio do Corpo de Alunos'},
+    {...item('Quantidade de faltas','number',true,'Ex.: 0'),min:0,max:9999,step:1},
+    item('Identificação das faltas · uma por linha','area',false,'AL matrícula especialidade nome')
+  ],
+  reference:{day:'startType',activity:'overnight'},
+  validate([_time,_place,rawCount,people]) {
+    const expected = Number(rawCount);
+    const actual = absenceList(people).length;
+    if (expected === actual) return '';
+    return 'A lista tem ' + actual + ' ' + (actual === 1 ? 'registro' : 'registros') +
+      '. Ajuste a quantidade de faltas ou a lista antes de inserir.';
+  },
+  apply(_old,[time,place,rawCount,people]) {
+    const count = Number(rawCount);
+    const words = countWords(count);
+    const location = /^(?:no|na|nos|nas|em|ao|à)\s/i.test(place) ? place : 'no ' + place;
+    const report = 'A retirada de faltas para o pernoite ocorreu ' + location + ', por volta das ' +
+      clock(time,false) + ', com ' + String(count).padStart(2,'0') + ' (' +
+      words[0].toUpperCase() + words.slice(1) + ') ' + (count === 1 ? 'falta' : 'faltas');
+    if (!count) return report + '.';
+    return report + (count === 1 ? ', sendo esta:' : ', sendo estas:') + '\n\n' +
+      absenceList(people).map((person,i) => (i + 1) + ' - ' + person).join('\n');
+  }
+};
+
+const order = {
+  ...departure,label:'Adicionar ordem de serviço',
+  apply(old, data) {
+    const entry = departure.format(data);
+    const heading = /^5\.\d+\) ORDEM DE SERVIÇO:[ \t]*$/m.exec(old);
+    if (!heading) return addEntry(old,nextOccurrence(old) + 'ORDEM DE SERVIÇO:\n\n' + entry);
+    const start = heading.index + heading[0].length;
+    const tail = old.slice(start);
+    const next = tail.search(/^5\.\d+\)/m);
+    if (next === -1) return old.trimEnd() + '\n\n' + entry;
+    return old.slice(0,start + next).trimEnd() + '\n\n' + entry + '\n\n' + tail.slice(next);
+  }
+};
+
+const identity = step('Identificação','Identificação e recebimento','Use a identificação completa. As datas entram automaticamente nos títulos e na passagem do serviço.');
+const dates = pair(identity);
+field(identity,'start','Serviço do dia',{type:'date',parent:dates});
+field(identity,'end','Para o dia',{type:'date',parent:dates});
+const profileFields = pair(identity);
+const profileChoices = [['','Selecione o tipo de dia'],...dayTypes];
+field(identity,'startType','Tipo de dia do recebimento',{choices:profileChoices,parent:profileFields,optional:true});
+field(identity,'endType','Tipo de dia da passagem',{choices:profileChoices,parent:profileFields,optional:true});
+groupAction(identity,'Passagem no dia seguinte',() => {
+  if (!dateText(value('start'))) {fields.get('start').control.focus(); return;}
+  const date = new Date(value('start') + 'T12:00:00Z');
+  date.setUTCDate(date.getUTCDate() + 1);
+  setField('end',date.toISOString().slice(0,10));
+});
+field(identity,'previous','Antecessor legal',{placeholder:'AL matrícula especialidade nome'});
+const rosterInputs = pair(identity);
+for (const [key,label] of roster) field(identity,key,label,{parent:rosterInputs,placeholder:key === 'officer' || key === 'sergeant' ? 'Posto, especialidade e nome' : 'AL matrícula especialidade nome'});
+
+const lodging = step('Alojamentos','Material, alojamentos e pernoite','Preencha cada alojamento a partir do relato da esquadrilha.');
+field(lodging,'material','Material carga',{type:'area',empty:noChange});
+field(lodging,'facilities','Relato geral das instalações',{
+  type:'area',optional:true,note:'Quando os quatro alojamentos estão sem alteração, o relato padrão é preenchido automaticamente na saída.'
+});
+groupAction(lodging,'Usar relato de instalações com alteração',() => setWithConfirm('facilities',
+  'As instalações foram conferidas pelos Alunos de Dia às Esquadrilhas, os quais informaram que houve alteração.'));
+const lodges = pair(lodging);
+for (const name of lodgings) field(lodging,'lodge-' + name,'Panes · ' + name,{parent:lodges,type:'area',empty:noChange});
+field(lodging,'overnight','Pernoite',{type:'area',empty:none,builder:overnightReport});
+
+const formation = step('Entradas em forma','1. Entradas em forma','Use o horário efetivo. Local e faltas entram no relato se você os preencher.');
+const referenceMeals = {0:{day:'startType',activity:'lunch'},2:{day:'startType',activity:'dinner'},4:{day:'endType',activity:'breakfast'}};
+events.forEach(([title,subject],i) => {
+  const builder = {
+    label:'Montar relato',
+    reference:referenceMeals[i],
+    fields:[item('Horário','time',true),item('Local','text',false,'Ex.: no Rancho Alfa'),item('Faltas ou observação','text',false,'Ex.: sem faltas')],
+    apply:(_old,[time,where,remarks]) => subject + ' ocorreu por volta de ' + clock(time,false) +
+      [where,remarks].filter(Boolean).map(text => ', ' + text.replace(/\.$/,'')).join('') + '.'
+  };
+  field(formation,'event-' + i,'1.' + (i + 1) + ') ' + title,{type:'area',empty:none,builder});
+});
+
+const health = step('Médicas','2. Ocorrências médicas','Cole o relato ou use os campos de atendimento e dispensa. Cada categoria pode ser confirmada separadamente.');
+groupAction(health,'Confirmar “Não houve” nas categorias vazias',() => {
+  const empty = health.keys.filter(key => !value(key));
+  if (!empty.length) {status('As categorias já têm preenchimento.'); return;}
+  if (!window.confirm('Confirma que não houve registro nas categorias médicas vazias?')) return;
+  for (const key of empty) {
+    draft.fields[key] = none;
+    fields.get(key).control.value = none;
+  }
+  refresh();
+});
+medical.forEach((title,i) => field(health,'medical-' + i,'2.' + (i + 1) + ') ' + title,{
+  type:'area',empty:none,builder:i === 13 ? waiver : visit
+}));
+
+const service = step('Equipe e permanência','3. Equipe de serviço','Os alunos de dia são reaproveitados da identificação. Complete a patrulha, a academia e as permanências.');
+field(service,'patrol','Patrulha · um aluno por linha',{type:'area',empty:none,emptyLabel:'Sem patrulha no registro'});
+field(service,'academy','Auxiliar da Academia',{placeholder:'AL matrícula especialidade nome',optional:true});
+field(service,'team','Editar equipe completa',{
+  type:'area',rows:3,optional:true,note:'Deixe vazio para usar a equipe montada pela identificação. Preencha aqui para ajustar a lista ou as funções.'
+});
+groupAction(service,'Trazer a equipe da identificação',() => setWithConfirm('team',autoTeam()));
+field(service,'swaps','3.1) Permutas de serviço',{type:'area',empty:none,builder:swap});
+subhead(service,'3.2) Permanências');
+periods.forEach((range,i) => field(service,'period-' + i,(i + 1) + ' · ' + range,{
+  type:'area',empty:none,placeholder:'Uma pessoa com sua função por linha'
+}));
+
+const logs = step('Guias e ocorrências','4. Guias e 5. Ocorrências gerais','Os campos de cada pessoa ficam em linhas consecutivas. Uma linha em branco separa os registros.');
+field(logs,'guides','4. Guia extraordinária',{type:'area',rows:4,empty:none,builder:departure});
+const generalField = field(logs,'general','5. Ocorrências gerais',{type:'area',rows:4,empty:none,builder:general,
+  note:'A ferramenta numera os novos relatos. Registre as permanências na seção própria.'});
+generalField.parentElement.querySelector('.group-actions').append(button(order.label,() => openBuilder('general','Ordem de serviço',order)));
+
+const close = step('Fechamento','6 a 11. Fechamento e passagem','Preencha os registros finais, o substituto legal e a assinatura para o formulário oficial.');
+field(close,'lnc','6. LNC',{type:'area',empty:none,placeholder:'Um aluno por linha, com o motivo'});
+field(close,'detention','7. Detenção',{type:'area',empty:none});
+field(close,'prison','8. Prisão',{type:'area',empty:none});
+field(close,'study','9. Estudo obrigatório',{type:'area',empty:none});
+field(close,'dismissal','10. Processo de desligamento',{type:'area',empty:none});
+field(close,'suggestions','11. Sugestões',{type:'area',empty:'Não há.'});
+field(close,'nextStudent','Substituto legal',{placeholder:'AL matrícula especialidade nome'});
+field(close,'signature','Aluno de SV · assinatura para o formulário oficial',{
+  optional:true,note:'Se deixar vazio, o site usa a identificação do aluno de dia para montar NOME AL MATRÍCULA ESPECIALIDADE.'
+});
+
+function openBuilder(key, title, config) {
+  get('dialog-title').textContent = title;
+  const list = get('record-fields');
+  list.replaceChildren();
+  get('record-error').textContent = '';
+  const controls = config.fields.map(({label,type,required,placeholder,initial = '',min,max,step},i) => {
+    const control = type === 'area' ? node('textarea',{rows:3}) : node('input',{type});
+    Object.assign(control,{id:'record-' + i,required,placeholder,value:initial,spellcheck:false,autocomplete:'off'});
+    if (type === 'number') Object.assign(control,{min,max,step});
+    control.addEventListener('input',() => {get('record-error').textContent = '';});
+    const holder = node('div',{className:'field'});
+    holder.append(node('label',{htmlFor:control.id,textContent:label}),control);
+    list.append(holder);
+    return control;
+  });
+  if (config.reference) {
+    const {time,message} = referenceInfo(config.reference);
+    const hint = node('div',{className:'reference-box'});
+    hint.append(node('p',{className:'hint',textContent:message}));
+    if (time) hint.append(button('Usar referência de ' + time,() => {controls[0].value = time;}));
+    list.prepend(hint);
+  }
+  activeDialog = {key,config,controls};
+  get('record-dialog').showModal();
+}
+
+get('record-cancel').addEventListener('click',() => get('record-dialog').close());
+get('record-form').addEventListener('submit',event => {
+  event.preventDefault();
+  const {key,config,controls} = activeDialog;
+  const missing = controls.find(control => control.required && !control.value.trim());
+  if (missing) {missing.focus(); return;}
+  const old = value(key);
+  const data = controls.map(control => control.value.trim());
+  const error = config.validate?.(data);
+  if (error) {get('record-error').textContent = error; return;}
+  const output = config.apply ? config.apply(old,data) : addEntry(old,config.format(data));
+  if ((key.startsWith('event-') || key === 'overnight') && old && old !== none && old !== output &&
+      !window.confirm('Substituir o relato atual?')) return;
+  setField(key,output);
+  get('record-dialog').close();
+});
+
+function filled(key) {
+  return value(key) || pendingMark;
+}
+
+function facilitiesText() {
+  if (value('facilities')) return value('facilities');
+  return lodgings.every(name => value('lodge-' + name) === noChange)
+    ? 'As instalações foram conferidas pelos Alunos de Dia às Esquadrilhas, os quais informaram que não houve alteração.'
+    : pendingMark;
+}
+
+function signatureFrom(name) {
+  const match = name.match(/^(AL)\s+(\S+)\s+(\S+)\s+(.+)$/i);
+  return match ? match[4] + ' ' + match.slice(1,4).join(' ') : '';
+}
+
+function autoTeam() {
+  const patrol = value('patrol') === none ? [] : filled('patrol').split('\n').map(person => person.trim()).filter(Boolean)
+    .map(person => /\(Patrulha - PT\)$/i.test(person) ? person : person + ' (Patrulha - PT)');
+  return lines([
+    filled('current') + ' (Aluno de dia ao Esquadrão Prata)',
+    ...[1,2,3,4].map(n => filled('flight' + n) + ' (' + (n > 2 ? 'Aluna' : 'Aluno') + ' de dia à ' + n + 'ª Esquadrilha do Esquadrão Prata)'),
+    ...patrol,
+    filled('ca') + ' (Aluno de dia ao Corpo de Alunos)',
+    ...(value('academy') ? [value('academy') + ' (Aux. Al de dia à Academia)'] : [])
+  ]);
+}
+
+const block = (heading,body) => heading + '\n\n' + body;
+const blocks = items => items.join('\n\n');
+
+function guidedOutput() {
+  const start = dateText(value('start')) || pendingMark;
+  const end = dateText(value('end')) || pendingMark;
+  const receiving = blocks([
+    'Eu, ' + filled('current') + ', recebi do meu antecessor legal, ' + filled('previous') +
+      ', o serviço de Aluno de dia ao Esquadrão Prata com todas as ordens em vigor.',
+    lines(roster.map(([key,label]) => row(label,filled(key))))
+  ]);
+  const facilities = blocks([
+    block('PANES DE ALOJAMENTO:',facilitiesText()),
+    ...lodgings.map(name => block('PANES DO ALOJAMENTO ' + name + ' no dia ' + start + ':',filled('lodge-' + name)))
+  ]);
+  const occurrences = blocks([
+    '1. ENTRADAS EM FORMA:',
+    ...events.map(([title],i) => block('1.' + (i + 1) + ') ' + title + ' DO DIA ' + (i < 4 ? start : end) + ':',filled('event-' + i))),
+    '2. OCORRÊNCIAS MÉDICAS:',
+    ...medical.map((title,i) => block('2.' + (i + 1) + ') ' + title + ':',filled('medical-' + i))),
+    block('3. EQUIPE DE SERVIÇO',value('team') || autoTeam()),
+    block('3.1) PERMUTAS DE SERVIÇO:',filled('swaps')),
+    '3.2) PERMANÊNCIAS:',
+    ...periods.map((range,i) => block((i + 1) + '- ' + range + ':',filled('period-' + i))),
+    block('4. GUIA EXTRAORDINÁRIA:',filled('guides')),
+    block('5. OCORRÊNCIAS GERAIS:',filled('general')),
+    block('6. LNC:',filled('lnc')),
+    block('7. DETENÇÃO:',filled('detention')),
+    block('8. PRISÃO:',filled('prison')),
+    block('9. ESTUDO OBRIGATÓRIO:',filled('study')),
+    block('10. PROCESSO DE DESLIGAMENTO:',filled('dismissal'))
+  ]);
+  const handover = 'Passei a meu substituto legal, ' + filled('nextStudent') + ', no dia ' + end +
+    ', o serviço de Aluno de Dia ao Esquadrão Prata, com todas as ordens em vigor.';
+  const signature = value('signature') || signatureFrom(value('current')) || pendingMark;
+  const material = filled('material');
+  const overnight = filled('overnight');
+  const suggestions = filled('suggestions');
+  return {
+    text: blocks([receiving,block('MATERIAL CARGA:',material),facilities,block('PERNOITE:',overnight),
+      block('OCORRÊNCIAS:',occurrences),block('11. SUGESTÕES:',suggestions),handover]) + '\n',
+    official: {start,end,receiving,material,facilities,overnight,occurrences,suggestions,handover,signature},
+    exportDate: value('end') || value('start'),
+    recognized: true
+  };
+}
+
+function importOutput() {
+  const text = draft.text.replace(/\r\n?/g,'\n');
+  const headings = [
+    /^MATERIAL CARGA:[ \t]*$/m,
+    /^(?:PANES DE ALOJAMENTO|INSTALAÇÕES):[ \t]*$/m,
+    /^PERNOITE:[ \t]*$/m,
+    /^OCORRÊNCIAS:[ \t]*$/m,
+    /^11\. SUGESTÕES:[ \t]*$/m,
+    /^Passei a meu substituto legal,/m
+  ].map(pattern => pattern.exec(text));
+  const recognized = headings.every((match,i) => match && (!i || headings[i - 1] && headings[i - 1].index < match.index));
+  if (!recognized) return {text,official:{},exportDate:'',recognized:false};
+  const [m,f,p,o,s,h] = headings;
+  const between = (first,next,includeTitle = false) => text.slice(first.index + (includeTitle ? 0 : first[0].length),next.index).trim();
+  const datePattern = '[0-9]{2} [A-Z]{3} [0-9]{4}';
+  const start = text.match(new RegExp('^1\\.1\\) ALMOÇO DO DIA (' + datePattern + '):','m'))?.[1] || '';
+  const end = text.match(new RegExp('^1\\.5\\) CAFÉ DA MANHÃ DO DIA (' + datePattern + '):','m'))?.[1] || '';
+  const author = text.match(/^Eu, ([^\n]+?), recebi do meu antecessor legal,/m)?.[1] || '';
+  return {text,recognized:true,exportDate:'',official:{
+    start,end,receiving:text.slice(0,m.index).trim(),material:between(m,f),facilities:between(f,p,true),
+    overnight:between(p,o),occurrences:between(o,s),suggestions:between(s,h),handover:text.slice(h.index).trim(),
+    signature:signatureFrom(author)
+  }};
+}
+
+const pendingPattern = /\[pendente(?:[^\]]*)\]/i;
+function isPending(key) {
+  const entry = value(key);
+  if (key === 'facilities') return pendingPattern.test(facilitiesText());
+  if (key === 'patrol' && value('team')) return false;
+  if (key === 'signature') return pendingPattern.test(entry) || Boolean(value('current') && !entry && !signatureFrom(value('current')));
+  if (key === 'start' || key === 'end') {
+    return !dateText(entry) || key === 'end' && Boolean(value('start') && entry < value('start'));
+  }
+  return pendingPattern.test(entry) || !entry && !fields.get(key).optional;
+}
+
+function showStep(index, focus = false) {
+  draft.section = Math.min(steps.length - 1,Math.max(0,index));
+  steps.forEach(({panel,navButton},i) => {
+    panel.hidden = i !== draft.section;
+    navButton.setAttribute('aria-current',String(i === draft.section));
+  });
+  get('back').disabled = draft.section === 0;
+  get('next').textContent = draft.section === steps.length - 1 ? 'Ver resultado' : 'Próxima seção';
+  if (focus) {
+    steps[draft.section].heading.focus({preventScroll:true});
+    get('editor').scrollIntoView({block:'start'});
+  }
+}
+
+function setMode(mode) {
+  draft.mode = mode;
+  const free = mode === 'free';
+  get('guided-mode').setAttribute('aria-pressed',String(!free));
+  get('free-mode').setAttribute('aria-pressed',String(free));
+  get('editor').hidden = get('nav').hidden = free;
+  get('free-editor').hidden = !free;
+  refresh();
+}
+
+function setView(nextView) {
+  view = nextView;
+  const official = view === 'official';
+  get('book-view').setAttribute('aria-pressed',String(!official));
+  get('official-view').setAttribute('aria-pressed',String(official));
+  get('official-output').hidden = !official;
+  get('book-output').hidden = official;
+  refresh();
+}
+
+function htmlFromText(text) {
+  const entities = {'&':'&amp;','<':'&lt;','>':'&gt;'};
+  return text.replace(/\r\n?/g,'\n').split(/(\n+)/).map((part,i) => {
+    if (i % 2) return '\n' + Array(part.length).fill('<br>').join(' ');
+    return part.replace(/[&<>]/g,char => entities[char])
+      .replace(/^ +| +$/g,spaces => '&nbsp;'.repeat(spaces.length))
+      .replace(/ {2,}/g,spaces => '&nbsp;'.repeat(spaces.length - 1) + ' ');
+  }).join('');
+}
+
+function updateOutput(control,text) {
+  if (control.value === text) return;
+  const top = control.scrollTop;
+  control.value = text;
+  control.scrollTop = top;
+}
+
+function refresh() {
+  for (const {note,reference} of scheduleNotes) note.textContent = referenceInfo(reference).message;
+  const free = draft.mode === 'free';
+  currentOutput = free ? importOutput() : guidedOutput();
+  const pending = [];
+  for (const {keys,badge} of steps) {
+    const missing = keys.filter(isPending);
+    pending.push(...missing);
+    badge.textContent = missing.length ? String(missing.length) : '✓';
+    badge.classList.toggle('complete',missing.length === 0);
+    badge.setAttribute('aria-label',missing.length ? missing.length + ' campos pendentes' : 'Completo');
+  }
+  const hasText = Boolean(currentOutput.text.trim());
+  const count = free ? [...currentOutput.text.matchAll(/\[pendente[^\]]*\]/gi)].length : pending.length;
+  const review = get('review');
+  review.textContent = !hasText ? 'Aguardando texto' : count ? count + (count === 1 ? ' pendência' : ' pendências') : 'Sem marcações pendentes';
+  review.classList.toggle('ready',hasText && !count);
+  get('next-pending').hidden = free || pending.length === 0;
+  updateOutput(get('preview'),currentOutput.text);
+  updateOutput(get('html-code'),htmlFromText(currentOutput.text));
+  for (const id of ['copy-zimbra','copy-text','copy-code','download']) get(id).disabled = !hasText;
+
+  if (view === 'official') {
+    get('official-hint').hidden = currentOutput.recognized;
+    for (const [key,{control,copy}] of officialControls) {
+      const text = currentOutput.official[key] || '';
+      updateOutput(control,text);
+      copy.disabled = !text;
+    }
+  }
+}
+
+function tryCopySelection() {
+  try { return document.execCommand('copy'); }
+  catch { return false; }
+}
+
+async function copyPlain(text, control, success) {
+  try {
+    await navigator.clipboard.writeText(text);
+    status(success);
+  } catch {
+    control.focus({preventScroll:true});
+    control.select();
+    if (tryCopySelection()) status(success);
+    else status('Texto selecionado. Use a opção Copiar do navegador.',true);
+  }
+}
+
+async function copyRich() {
+  const plain = currentOutput.text;
+  const html = htmlFromText(plain);
+  const success = 'Livro copiado. No Zimbra, use o modo HTML e cole normalmente.';
+  try {
+    await navigator.clipboard.write([new ClipboardItem({
+      'text/html':new Blob([html],{type:'text/html'}),
+      'text/plain':new Blob([plain],{type:'text/plain'})
+    })]);
+    status(success);
+  } catch {
+    const target = node('div',{className:'preview-copy',innerHTML:html});
+    get('resultado').append(target);
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(target);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    const copied = tryCopySelection();
+    selection.removeAllRanges();
+    target.remove();
+    if (copied) status(success);
+    else status('A cópia formatada foi bloqueada pelo navegador. Tente “Copiar TXT” ou use o código HTML em um editor com campo de código-fonte.',true);
+  }
+}
+
+function downloadText() {
+  const filename = 'Livro_PRATA' + (currentOutput.exportDate ? '_' + currentOutput.exportDate : '') + '.txt';
+  const url = URL.createObjectURL(new Blob([currentOutput.text],{type:'text/plain;charset=utf-8'}));
+  const link = node('a',{href:url,download:filename});
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url),1500);
+  status('TXT gerado.');
+}
+
+get('official-list').append(node('p',{id:'official-hint',className:'hint note',
+  textContent:'O texto livre precisa conter os títulos do modelo para separar os campos. Você pode copiar o livro completo pela outra aba.'}));
+for (const [key,label] of officialLabels) {
+  const id = 'output-' + key;
+  const holder = node('div',{className:'field'});
+  const top = node('div',{className:'copy-row'});
+  const control = node('textarea',{id,rows:['start','end','signature'].includes(key) ? 1 : 3,readOnly:true,spellcheck:false});
+  const copy = button('Copiar',() => copyPlain(control.value,control,label + ' copiado.'));
+  copy.setAttribute('aria-label','Copiar ' + label);
+  top.append(node('label',{htmlFor:id,textContent:label}),copy);
+  holder.append(top,control);
+  get('official-list').append(holder);
+  officialControls.set(key,{control,copy});
+}
+
+get('guided-mode').addEventListener('click',() => setMode('guided'));
+get('free-mode').addEventListener('click',() => setMode('free'));
+get('book-view').addEventListener('click',() => setView('book'));
+get('official-view').addEventListener('click',() => setView('official'));
+get('back').addEventListener('click',() => showStep(draft.section - 1,true));
+get('next').addEventListener('click',() => {
+  if (draft.section === steps.length - 1) get('resultado').scrollIntoView({block:'start'});
+  else showStep(draft.section + 1,true);
+});
+get('next-pending').addEventListener('click',() => {
+  const key = steps.flatMap(step => step.keys).find(isPending);
+  if (!key) return;
+  const {control,group,label} = fields.get(key);
+  showStep(steps.indexOf(group));
+  control.focus({preventScroll:true});
+  control.scrollIntoView({block:'center'});
+  status('Confira ' + label + '.');
+});
+get('free-text').addEventListener('input',event => {draft.text = event.target.value;refresh();});
+get('use-guided').addEventListener('click',() => {
+  if (draft.text.trim() && !window.confirm('Substituir o texto livre pela versão do formulário?')) return;
+  draft.text = guidedOutput().text;
+  get('free-text').value = draft.text;
+  refresh();
+  status('Texto do formulário copiado para o editor livre.');
+});
+get('open-txt').addEventListener('click',() => get('txt-file').click());
+get('txt-file').addEventListener('change',async event => {
+  const input = event.target;
+  const file = input.files[0];
+  if (!file) return;
+  try {
+    const text = (await file.text()).replace(/^\uFEFF/,'').replace(/\r\n?/g,'\n');
+    if (draft.text.trim() && !window.confirm('Substituir o texto livre pelo arquivo selecionado?')) return;
+    draft.text = text;
+    get('free-text').value = text;
+    setMode('free');
+    status('TXT aberto no editor de texto livre.');
+  } catch {
+    status('Não foi possível abrir o TXT. Cole o conteúdo no editor de texto livre.',true);
+  } finally {
+    input.value = '';
+  }
+});
+
+get('copy-zimbra').addEventListener('click',copyRich);
+get('copy-text').addEventListener('click',() => copyPlain(currentOutput.text,get('preview'),'Texto simples copiado.'));
+get('copy-code').addEventListener('click',() => copyPlain(get('html-code').value,get('html-code'),'Código HTML copiado.'));
+get('download').addEventListener('click',downloadText);
+
+function restoreDraft() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey));
+    if (saved?.version !== 1 || !saved.fields) return;
+    for (const [key,{control}] of fields) {
+      const stored = saved.fields[key];
+      if (typeof stored !== 'string') continue;
+      control.value = stored;
+      draft.fields[key] = control.value;
+    }
+    if (typeof saved.text === 'string') draft.text = saved.text;
+    if (saved.mode === 'free') draft.mode = 'free';
+    if (Number.isInteger(saved.section)) draft.section = saved.section;
+  } catch {}
+}
+
+get('save').addEventListener('click',() => {
+  try {
+    localStorage.setItem(storageKey,JSON.stringify(draft));
+    status('Rascunho salvo neste navegador.');
+  } catch {
+    status('O navegador não conseguiu salvar. Use “Baixar TXT” para guardar uma cópia.',true);
+  }
+});
+get('reset').addEventListener('click',() => {
+  const filledIn = draft.text.trim() || Object.values(draft.fields).some(text => text.trim());
+  if (filledIn && !window.confirm('Iniciar outro serviço e apagar o rascunho deste navegador?')) return;
+  try {
+    localStorage.removeItem(storageKey);
+  } catch {
+    status('O navegador bloqueou o acesso ao rascunho. Abra o site em outra janela ou revise as permissões locais.',true);
+    return;
+  }
+  draft = freshDraft();
+  for (const {control} of fields.values()) control.value = '';
+  get('free-text').value = '';
+  showStep(0);
+  setMode('guided');
+  setView('book');
+  status('Novo serviço iniciado.');
+});
+
+const scheduleDay = get('schedule-day');
+for (const [value,label] of dayTypes) scheduleDay.append(node('option',{value,textContent:label}));
+const scheduleInputs = new Map();
+for (const [activity,label] of activityLabels) {
+  const id = 'schedule-' + activity;
+  const holder = node('div',{className:'field'});
+  const input = node('input',{id,type:'time'});
+  holder.append(node('label',{htmlFor:id,textContent:label}),input);
+  get('schedule-times').append(holder);
+  scheduleInputs.set(activity,input);
+}
+
+let scheduleDraft;
+let editedDay;
+function loadDay() {
+  editedDay = scheduleDay.value;
+  for (const [activity,input] of scheduleInputs) input.value = scheduleDraft[editedDay]?.[activity] || '';
+}
+function updateScheduleDraft() {
+  scheduleDraft[editedDay] = Object.fromEntries([...scheduleInputs].map(([activity,input]) => [activity,input.value]));
+}
+get('schedule-open').addEventListener('click',() => {
+  scheduleDraft = Object.fromEntries(dayTypes.map(([type]) => [
+    type,Object.fromEntries(activityLabels.map(([activity]) => [activity,configuredTime(type,activity)]))
+  ]));
+  scheduleDay.value = value('startType') || dayTypes[0][0];
+  loadDay();
+  get('schedule-dialog').showModal();
+});
+scheduleDay.addEventListener('change',() => {updateScheduleDraft();loadDay();});
+get('schedule-cancel').addEventListener('click',() => get('schedule-dialog').close());
+get('schedule-form').addEventListener('submit',event => {
+  event.preventDefault();
+  updateScheduleDraft();
+  schedule = scheduleDraft;
+  get('schedule-dialog').close();
+  refresh();
+  try {
+    localStorage.setItem(scheduleKey,JSON.stringify(schedule));
+    status('Horários de referência salvos neste navegador.');
+  } catch {
+    status('Horários aplicados nesta sessão. O navegador bloqueou o armazenamento local.',true);
+  }
+});
+
+restoreDraft();
+get('free-text').value = draft.text;
+showStep(draft.section);
+setMode(draft.mode);
+</script>
+</body>
+</html>
