@@ -62,8 +62,11 @@
   .section-tools { margin:8px 0 3px; }
   .section-foot { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; margin-top:17px; padding-top:13px; border-top:1px solid var(--line); }
   .result-head { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; flex-wrap:wrap; }
-  .pill { display:inline-flex; align-items:center; gap:5px; padding:3px 7px; border-radius:6px; background:#fbf1df; color:var(--warn); font-size:.76rem; font-weight:740; }
+  .pill { display:inline-flex; align-items:center; gap:6px; min-height:30px; padding:3px 7px; border:1px solid transparent; border-radius:6px; background:#fbf1df; color:var(--warn); font:740 .76rem/1.4 system-ui,sans-serif; }
   .pill.ready { background:#e3f3eb; color:var(--ok); }
+  .pill:not(:disabled) { border-color:#e3c992; cursor:pointer; }
+  .pill:not(:disabled):hover { background:#f4e4c2; }
+  .pill:disabled .pending-arrow { display:none; }
   .result-tabs { display:flex; gap:6px; flex-wrap:wrap; margin-top:11px; }
   .preview { height:min(51vh,600px); min-height:200px; resize:vertical; margin:10px 0; font: .79rem/1.57 ui-monospace,Consolas,monospace; background:#f7faff; }
   .exports { gap:6px; }
@@ -84,6 +87,9 @@
   dialog { width:min(465px,calc(100% - 22px)); max-height:calc(100% - 25px); padding:16px; color:var(--ink); border:1px solid var(--line); border-radius:11px; }
   dialog::backdrop { background:#0b2336ac; }
   .dialog-actions { margin-top:13px; }
+  .pending-list { display:grid; gap:6px; padding:0; margin:10px 0 0; list-style:none; }
+  .pending-item { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:10px; width:100%; min-height:44px; padding:8px 10px; text-align:left; overflow-wrap:anywhere; }
+  .pending-item .hint { display:block; margin-top:3px; font-weight:450; }
   .reference-note { margin-top:5px; color:var(--accent-dark); font-size:.81rem; }
   .reference-box { margin-top:9px; padding:8px 10px; border-radius:7px; background:var(--soft); }
   .reference-box .btn { margin-top:6px; }
@@ -100,6 +106,7 @@
   }
   @media (max-width:740px) {
     .frame { width:calc(100% - 22px); }
+    .pill { min-height:40px; }
     .mast { padding:15px 0; }
     .mast-actions { width:100%; }
     .workspace { grid-template-columns:minmax(0,1fr); gap:10px; }
@@ -163,7 +170,12 @@
     </section>
 
     <aside class="card result" id="resultado" aria-labelledby="result-title">
-      <div class="result-head"><h2 id="result-title">Resultado</h2><span class="pill" id="review"></span></div>
+      <div class="result-head">
+        <h2 id="result-title">Resultado</h2>
+        <button class="pill" id="review" type="button" aria-haspopup="dialog" aria-controls="pending-dialog" disabled>
+          <span id="review-label"></span><span class="pending-arrow" aria-hidden="true">›</span>
+        </button>
+      </div>
       <div class="result-tabs" aria-label="Visualização do resultado">
         <button class="btn btn-small" id="book-view" type="button" aria-pressed="true">Livro completo</button>
         <button class="btn btn-small" id="official-view" type="button" aria-pressed="false">Campos oficiais</button>
@@ -193,6 +205,14 @@
 </main>
 
 <p class="float-status" id="status" role="status"></p>
+<dialog id="pending-dialog" aria-labelledby="pending-title">
+  <h2 id="pending-title">Pendências do livro</h2>
+  <p class="hint help-top" id="pending-hint"></p>
+  <ul id="pending-list" class="pending-list"></ul>
+  <form method="dialog" class="dialog-actions">
+    <button class="btn" type="submit" autofocus>Fechar</button>
+  </form>
+</dialog>
 <dialog id="record-dialog" aria-labelledby="dialog-title">
   <form id="record-form">
     <h2 id="dialog-title"></h2>
@@ -267,6 +287,7 @@ let draft = freshDraft();
 let view = 'book';
 let noticeTimer;
 let currentOutput;
+let pendingItems = [];
 let activeDialog;
 const fields = new Map();
 const steps = [];
@@ -300,7 +321,7 @@ function step(label, title, hint) {
   navButton.append(node('span', {className:'nav-number',textContent:String(index + 1).padStart(2,'0')}),
     node('span', {className:'nav-name',textContent:label}), badge);
   get('nav-list').append(navButton);
-  const group = {panel, heading, navButton, badge, keys: []};
+  const group = {label, panel, heading, navButton, badge, keys: []};
   steps.push(group);
   return group;
 }
@@ -746,6 +767,39 @@ function importOutput() {
 }
 
 const pendingPattern = /\[pendente(?:[^\]]*)\]/i;
+
+function textPendingItems(text) {
+  const items = [];
+  const matches = text.matchAll(new RegExp(pendingPattern.source,'gi'));
+  let next = matches.next();
+  let heading = '';
+  let record = '';
+  let offset = 0;
+  const headingPattern = /^(?:\d+(?:\.\d+)?[.)-]\s+\S|(?:MATERIAL CARGA|PANES DE ALOJAMENTO|PANES DO ALOJAMENTO [^:]+|INSTALAÇÕES|PERNOITE|OCORRÊNCIAS):$)/i;
+  text.split('\n').forEach((line,index) => {
+    const trimmed = line.trim();
+    if (headingPattern.test(trimmed)) {
+      heading = trimmed;
+      record = '';
+    } else if (/^AL\s+(?:\d|\[pendente)/i.test(trimmed)) {
+      record = trimmed;
+    }
+    while (!next.done && next.value.index <= offset + line.length) {
+      const match = next.value;
+      const start = match.index;
+      const context = [record,trimmed].filter(Boolean);
+      items.push({
+        title: 'Linha ' + (index + 1) + (heading && heading !== trimmed ? ' · ' + heading : ''),
+        detail: [...new Set(context)].join(' · '),
+        start,end:start + match[0].length
+      });
+      next = matches.next();
+    }
+    offset += line.length + 1;
+  });
+  return items;
+}
+
 function isPending(key) {
   const entry = value(key);
   if (key === 'facilities') return pendingPattern.test(facilitiesText());
@@ -821,9 +875,15 @@ function refresh() {
     badge.setAttribute('aria-label',missing.length ? missing.length + ' campos pendentes' : 'Completo');
   }
   const hasText = Boolean(currentOutput.text.trim());
-  const count = free ? [...currentOutput.text.matchAll(/\[pendente[^\]]*\]/gi)].length : pending.length;
+  pendingItems = free ? textPendingItems(currentOutput.text) : pending.map(key => {
+    const {label,group} = fields.get(key);
+    const mark = value(key).match(pendingPattern)?.[0];
+    return {key,title:label,detail:[group.label,mark].filter(Boolean).join(' · ')};
+  });
+  const count = pendingItems.length;
   const review = get('review');
-  review.textContent = !hasText ? 'Aguardando texto' : count ? count + (count === 1 ? ' pendência' : ' pendências') : 'Sem marcações pendentes';
+  get('review-label').textContent = !hasText ? 'Aguardando texto' : count ? count + (count === 1 ? ' pendência' : ' pendências') : 'Sem marcações pendentes';
+  review.disabled = count === 0;
   review.classList.toggle('ready',hasText && !count);
   get('next-pending').hidden = free || pending.length === 0;
   updateOutput(get('preview'),currentOutput.text);
@@ -918,14 +978,63 @@ get('next').addEventListener('click',() => {
   if (draft.section === steps.length - 1) get('resultado').scrollIntoView({block:'start'});
   else showStep(draft.section + 1,true);
 });
-get('next-pending').addEventListener('click',() => {
-  const key = steps.flatMap(step => step.keys).find(isPending);
-  if (!key) return;
+function goToPendingField(key) {
   const {control,group,label} = fields.get(key);
   showStep(steps.indexOf(group));
   control.focus({preventScroll:true});
   control.scrollIntoView({block:'center'});
   status('Confira ' + label + '.');
+}
+
+function goToPendingText(start,end) {
+  const control = get('free-text');
+  const style = getComputedStyle(control);
+  const measure = node('textarea',{value:control.value.slice(0,start) + '|',tabIndex:-1});
+  measure.setAttribute('aria-hidden','true');
+  Object.assign(measure.style,{
+    position:'fixed',visibility:'hidden',overflow:'hidden',top:'0',left:'0',
+    width:control.clientWidth + 'px',height:'0',minHeight:'0',border:'0',
+    padding:style.padding,font:style.font,letterSpacing:style.letterSpacing,
+    wordSpacing:style.wordSpacing,tabSize:style.tabSize,
+    whiteSpace:style.whiteSpace,overflowWrap:style.overflowWrap
+  });
+  document.body.append(measure);
+  const position = measure.scrollHeight;
+  measure.remove();
+  control.scrollIntoView({block:'center'});
+  control.focus({preventScroll:true});
+  control.setSelectionRange(start,end);
+  control.scrollTop = position - control.clientHeight / 2;
+}
+
+get('next-pending').addEventListener('click',() => {
+  if (pendingItems[0]?.key) goToPendingField(pendingItems[0].key);
+});
+get('review').addEventListener('click',() => {
+  if (!pendingItems.length) return;
+  const dialog = get('pending-dialog');
+  get('pending-hint').textContent = draft.mode === 'free'
+    ? 'Selecione uma marcação para encontrá-la no texto.'
+    : 'Selecione um campo para abrir a seção correspondente.';
+  get('pending-list').replaceChildren(...pendingItems.map(item => {
+    const row = node('li');
+    const jump = button('',() => {
+      dialog.close();
+      if (item.key) {
+        goToPendingField(item.key);
+      } else {
+        goToPendingText(item.start,item.end);
+      }
+    },'btn pending-item');
+    const text = node('span',{textContent:item.title});
+    text.append(node('span',{className:'hint',textContent:item.detail}));
+    const arrow = node('span',{textContent:'›'});
+    arrow.setAttribute('aria-hidden','true');
+    jump.append(text,arrow);
+    row.append(jump);
+    return row;
+  }));
+  dialog.showModal();
 });
 get('free-text').addEventListener('input',event => {draft.text = event.target.value;refresh();});
 get('use-guided').addEventListener('click',() => {
